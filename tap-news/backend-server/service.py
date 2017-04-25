@@ -6,7 +6,7 @@ import sys
 from bson.json_util import dumps
 
 # import common package in parent directory
-sys.path.append(os.path.join(os.path.dirname(__file__), './', 'utils'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 SERVER_HOST = 'localhost'
 SERVER_PORT = 4040
@@ -14,7 +14,7 @@ SERVER_PORT = 4040
 import mongodb_client
 
 class RequestHandler(pyjsonrpc.HttpRequestHandler):
-	"""Test Mehtod"""
+	"""Test Method"""
 	@pyjsonrpc.rpcmethod
 	def add(self,a,b):
 		print "add is called with %d and %d!" % (a,b)
