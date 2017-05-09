@@ -11,14 +11,20 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
-from cloudAMQP_client import CloudAMQPClient
+import news_topic_modeling_service_client
 
-DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://yrvoxnud:H9FPhFT-9uee6ZNfOJstEZFi98SCKLcI@donkey.rmq.cloudamqp.com/yrvoxnud"
-DEDUPE_NEWS_TASK_QUEUE_NAME = "tap-news-dedupe-news-task-queue"
+from cloudAMQP_client import CloudAMQPClient
+import yaml
+
+with open('../config.yaml', 'r') as configFile:
+    cfg = yaml.load(configFile)
+
+DEDUPE_NEWS_TASK_QUEUE_URL = cfg['cloudAMQP']['dedupe_news_task_queue_url']
+DEDUPE_NEWS_TASK_QUEUE_NAME = cfg['cloudAMQP']['dedupe_news_task_queue_name']
 
 SLEEP_TIME_IN_SECONDS = 1
 
-NEWS_TABLE_NAME = "news"
+NEWS_TABLE_NAME = cfg['mongodb']['news_table_name']
 
 SAME_NEWS_SIMILARITY_THRESHOLD = 0.9
 
@@ -45,7 +51,7 @@ def handle_message(msg):
 
     if recent_news_list is not None and len(recent_news_list) > 0:
         documents = [str(news['text']) for news in recent_news_list]
-        documents.insert(0,text)
+        documents.insert(0, text)
 
         # Calculate similarity matrix
         tfidf = TfidfVectorizer().fit_transform(documents)
@@ -61,6 +67,12 @@ def handle_message(msg):
                 return
     task['publishedAt'] = parser.parse(task['publishedAt'])
 
+    # Classify news
+    # title = task['title']
+    # if title is None:
+    topic = news_topic_modeling_service_client.classify(task['description'])
+    task['class'] = topic
+
     db[NEWS_TABLE_NAME].replace_one({'digest': task['digest']}, task, upsert=True)
 
 while True:
@@ -71,6 +83,6 @@ while True:
             try:
                 handle_message(msg)
             except Exception as e:
-                print # coding=utf-8
+                print e
                 pass
         cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)

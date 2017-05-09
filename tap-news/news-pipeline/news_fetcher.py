@@ -11,11 +11,15 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'scrapers'))
 
 import cnn_news_scraper
 from cloudAMQP_client import CloudAMQPClient
+import yaml
 
-DEDUPE_NEWS_TASK_QUEUE_URL = "amqp://yrvoxnud:H9FPhFT-9uee6ZNfOJstEZFi98SCKLcI@donkey.rmq.cloudamqp.com/yrvoxnud"
-DEDUPE_NEWS_TASK_QUEUE_NAME = "tap-news-dedupe-news-task-queue"
-SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://lpxgjkmt:xvCbuMX-h7G6BGehoF_A3WWaLslUNp8g@donkey.rmq.cloudamqp.com/lpxgjkmt"
-SCRAPE_NEWS_TASK_QUEUE_NAME = "tap-news-scrape-news-task-queue"
+with open('../config.yaml', 'r') as configFile:
+    cfg = yaml.load(configFile)
+
+DEDUPE_NEWS_TASK_QUEUE_URL = cfg['cloudAMQP']['dedupe_news_task_queue_url']
+DEDUPE_NEWS_TASK_QUEUE_NAME = cfg['cloudAMQP']['dedupe_news_task_queue_name']
+SCRAPE_NEWS_TASK_QUEUE_URL = cfg['cloudAMQP']['scrape_news_task_queue_url']
+SCRAPE_NEWS_TASK_QUEUE_NAME = cfg['cloudAMQP']['scrape_news_task_queue_name']
 
 SLEEP_TIME_IN_SECONDS = 5
 

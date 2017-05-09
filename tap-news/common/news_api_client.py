@@ -1,12 +1,15 @@
 #send http requests to aimed server
 import requests
-
+import yaml
 
 from json import loads
 
-NEWS_API_ENDPOINT = 'http://newsapi.org/v1/'
-NEWS_API_KEY = '2b30e497e7f1406ab382aed189ea0622'
-ARTICLES_API = 'articles'
+with open('../config.yaml', 'r') as configFile:
+    cfg = yaml.load(configFile)
+
+NEWS_API_ENDPOINT = cfg['news_api']['news_api_endpoint']
+NEWS_API_KEY = cfg['news_api']['news_api_key']
+ARTICLES_API = cfg['news_api']['articles_api']
 
 CNN = 'cnn'
 DEFAULT_SOURCES = [CNN]

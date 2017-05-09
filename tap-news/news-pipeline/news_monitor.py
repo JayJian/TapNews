@@ -11,12 +11,18 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import news_api_client
 # import CloudAMQPClient class from cloudAMQP_client.py
 from cloudAMQP_client import CloudAMQPClient
+import yaml
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
+with open('../config.yaml', 'r') as configFile:
+    cfg = yaml.load(configFile)
 
-SCRAPE_NEWS_TASK_QUEUE_URL = "amqp://lpxgjkmt:xvCbuMX-h7G6BGehoF_A3WWaLslUNp8g@donkey.rmq.cloudamqp.com/lpxgjkmt"
-SCRAPE_NEWS_TASK_QUEUE_NAME = "tap-news-scrape-news-task-queue"
+DEDUPE_NEWS_TASK_QUEUE_URL = cfg['cloudAMQP']['dedupe_news_task_queue_url']
+DEDUPE_NEWS_TASK_QUEUE_NAME = cfg['cloudAMQP']['dedupe_news_task_queue_name']
+SCRAPE_NEWS_TASK_QUEUE_URL = cfg['cloudAMQP']['scrape_news_task_queue_url']
+SCRAPE_NEWS_TASK_QUEUE_NAME = cfg['cloudAMQP']['scrape_news_task_queue_name']
+
+REDIS_HOST = cfg['redis']['host']
+REDIS_PORT = cfg['redis']['port']
 
 NEWS_TIME_OUT_IN_SECONDS = 3600 * 24
 SLEEP_TIME_IN_SECONDS = 10
@@ -29,10 +35,13 @@ NEWS_SOURCE = [
     'entertainment-weekly',
     'espn',
     'ign',
+    'new-scientist',
     'techcrunch',
+    'techradar',
     'the-new-york-times',
     'the-wall-street-journal',
-    'the-washington-post'
+    'the-washington-post',
+    'usa-today'
 ]
 
 # initialize redis client and cloudAMQP client

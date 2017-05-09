@@ -1,0 +1,32 @@
+redis:
+  host: localhost
+  port: 6379
+
+cloudAMQP:
+  dedupe_news_task_queue_url: amqp://yrvoxnud:H9FPhFT-9uee6ZNfOJstEZFi98SCKLcI@donkey.rmq.cloudamqp.com/yrvoxnud
+  dedupe_news_task_queue_name: tap-news-dedupe-news-task-queue
+  log_clicks_task_queue_url: amqp://focmiktr:FMYpPys6S9XnAdJbIQA9sv8L8kWTcnsC@donkey.rmq.cloudamqp.com/focmiktr
+  log_clicks_task_queue_name: tap-news-log-clicks-task-queue
+  scrape_news_task_queue_url: amqp://lpxgjkmt:xvCbuMX-h7G6BGehoF_A3WWaLslUNp8g@donkey.rmq.cloudamqp.com/lpxgjkmt
+  scrape_news_task_queue_name: tap-news-scrape-news-task-queue
+
+mongodb:
+  host: localhost
+  port: 27017
+  db_name: tap-news
+  news_table_name: news
+  click_logs_table_name: click_logs
+  preference_model_table_name: user_preference_model
+
+services:
+  recommend_url: http://localhost:5050/
+  modeling_url: http://localhost:6060/
+  host: localhost
+  rpc_port: 4040
+  model_port: 6060
+  recommend_port: 5050
+
+news_api:
+  news_api_endpoint: http://newsapi.org/v1/
+  news_api_key: 2b30e497e7f1406ab382aed189ea0622
+  articles_api: articles

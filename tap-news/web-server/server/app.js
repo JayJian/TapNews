@@ -42,14 +42,14 @@ const authCheckMiddleware = require('./middleware/auth_checker');
 app.use('/news', authCheckMiddleware);
 
 app.use('/', index);
-app.use('/auth',auth);
 app.use('/news', news);
+app.use('/auth',auth);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
-  res.render('404 Not Found');
+  res.send('404 Not Found');
 });
 
 

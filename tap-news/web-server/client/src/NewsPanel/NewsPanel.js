@@ -9,7 +9,7 @@ import Auth from '../Auth/Auth';
 class NewsPanel extends React.Component{
 	constructor(){
 		super();
-		this.state = {news:null};
+		this.state = {news:null, pageNum:1, totalPages:1, loadAll:false};
 		this.handleScroll = this.handleScroll.bind(this);
 	}
 
@@ -17,6 +17,10 @@ class NewsPanel extends React.Component{
 		this.loadMoreNews();
 		this.loadMoreNews = _.debounce(this.loadMoreNews, 1000);
 		window.addEventListener('scroll', this.handleScroll);
+	}
+
+	componentWillUnMount() {
+		window.removeEventListener('scroll', this.handleScroll);
 	}
 
 	handleScroll() {
@@ -28,9 +32,16 @@ class NewsPanel extends React.Component{
   }
 
 	loadMoreNews() {
-    let request = new Request('http://localhost:3000/news', {
+    if (this.state.loadedAll === true) {
+      return;
+    }
+
+    let url = 'http://localhost:3000/news/userId/' + Auth.getEmail()
+              + '/pageNum/' + this.state.pageNum;
+
+    let request = new Request(encodeURI(url), {
       method: 'GET',
-			headers: {
+      headers: {
         'Authorization': 'bearer ' + Auth.getToken(),
       },
       cache: false});
@@ -38,8 +49,12 @@ class NewsPanel extends React.Component{
     fetch(request)
       .then((res) => res.json())
       .then((news) => {
+				if(!news || news.length===0){
+					this.setState({loadAll:true});
+				}
         this.setState({
           news: this.state.news? this.state.news.concat(news) : news,
+					pageNum: this.state.pageNum + 1,
         });
       });
   }
