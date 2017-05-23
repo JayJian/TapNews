@@ -5,25 +5,32 @@ import pandas as pd
 import pickle
 import pyjsonrpc
 import sys
+import socket
+import time
 import tensorflow as tf
 import time
+
 
 from tensorflow.contrib.learn.python.learn.estimators import model_fn
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+
 # import packages in trainer
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'trainer'))
 import news_cnn_model
-import yaml
-
-with open('../../config.yaml', 'r') as configFile:
-    cfg = yaml.load(configFile)
 
 learn = tf.contrib.learn
 
+import yaml
+with open('../../config.yaml', 'r') as configFile:
+    cfg = yaml.load(configFile)
+
 SERVER_HOST = cfg['services']['host']
 SERVER_PORT = cfg['services']['model_port']
+
+CARBON_SERVER = cfg['graphite_carbon']['carbon_server']
+CARBON_PORT = cfg['graphite_carbon']['carbon_port']
 
 MODEL_DIR = '../model'
 MODEL_UPDATE_LAG_IN_SECONDS = 10
@@ -91,6 +98,14 @@ class RequestHandler(pyjsonrpc.HttpRequestHandler):
                 predict_x, as_iterable=True)
         ]
         print y_predicted[0]
+
+        timestamp = int(time.time())
+        args = ['tap-news.services.topicRequest','1']
+        message = '%s %s %d\n' % (args[0], args[1], timestamp)
+        sock = socket.socket()
+        sock.connect((CARBON_SERVER,CARBON_PORT))
+        sock.sendall(message)
+        sock.close()
         topic = news_classes.class_map[str(y_predicted[0])]
         return topic
 

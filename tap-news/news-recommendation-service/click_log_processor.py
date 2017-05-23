@@ -21,6 +21,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
+import system_log_client
 from cloudAMQP_client import CloudAMQPClient
 import yaml
 
@@ -68,7 +69,8 @@ def handleMsg(msg):
         model = new_model
         db[PREFERENCE_MODEL_TABLE_NAME].insert(model)
 
-    print 'Updating preference model for new user: %s' % userId
+    system_log_client.logger.info('Updating preference model for new user: %s' % userId)
+    # print 'Updating preference model for new user: %s' % userId
 
     # Update model using time decaying method
     news = db[NEWS_TABLE_NAME].find_one({'digest': newsId})
@@ -105,7 +107,7 @@ def run():
                 try:
                     handleMsg(msg)
                 except Exception as e:
-                    print e
+                    system_log_client.logger.error(e)
                     pass
             # Remove this if this becomes a bottleneck.
             cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)

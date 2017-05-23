@@ -11,6 +11,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import news_api_client
 # import CloudAMQPClient class from cloudAMQP_client.py
 from cloudAMQP_client import CloudAMQPClient
+import system_log_client
+import msg_to_graphite
 import yaml
 
 with open('../config.yaml', 'r') as configFile:
@@ -71,5 +73,4 @@ while True:
             cloudAMQP_client.sendMessage(news)
 
     print "Fetched %d new news" % num_of_new_news
-
     cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)

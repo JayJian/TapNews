@@ -10,7 +10,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 sys.path.append(os.path.join(os.path.dirname(__file__),'scrapers'))
 
 import cnn_news_scraper
+import msg_to_graphite
 from cloudAMQP_client import CloudAMQPClient
+import system_log_client
 import yaml
 
 with open('../config.yaml', 'r') as configFile:
@@ -29,7 +31,8 @@ scrape_news_queue_client = CloudAMQPClient(SCRAPE_NEWS_TASK_QUEUE_URL, SCRAPE_NE
 def handle_message(msg):
     # check whether msg is none or it's a json format
     if msg is None or not isinstance(msg, dict):
-        print "Message is broken"
+        # print "Message is broken"
+        system_log_client.logger.warn("Message is broken!")
         return
 
     task = msg
@@ -49,7 +52,10 @@ while True:
             #handle the msg
             try:
                 handle_message(msg)
+                args = ['tap-news.AMQP.scrape','1']
+                msg_to_graphite.main(args)
             except Exception as e:
-                print # coding=utf-8
+                system_log_client.logger.error(e)
+                # print e
                 pass
         scrape_news_queue_client.sleep(SLEEP_TIME_IN_SECONDS)

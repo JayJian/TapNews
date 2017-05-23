@@ -20,7 +20,7 @@ router.post('/userId/:userId/newsId/:newsId', function(req,res, next) {
   news_id = req.params['newsId'];
 
   rpc_client.logNewsClickForUser(user_id, news_id);
-  res.status(200);
+  res.status(200).end();
 });
 
 module.exports = router;

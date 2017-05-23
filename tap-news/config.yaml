@@ -30,3 +30,7 @@ news_api:
   news_api_endpoint: http://newsapi.org/v1/
   news_api_key: 2b30e497e7f1406ab382aed189ea0622
   articles_api: articles
+
+graphite_carbon:
+  carbon_server: localhost
+  carbon_port: 2003

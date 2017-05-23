@@ -7,6 +7,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
+import msg_to_graphite
 import yaml
 
 with open('../config.yaml', 'r') as configFile:
@@ -26,6 +27,8 @@ class RequestHandler(pyjsonrpc.HttpRequestHandler):
     """ Get user's preference in an ordered class list """
     @pyjsonrpc.rpcmethod
     def getPreferenceForUser(self, user_id):
+        args = ['tap-news.services.recommendRequest','1']
+        msg_to_graphite.main(args)
         db = mongodb_client.get_db()
         model = db[PREFERENCE_MODEL_TABLE_NAME].find_one({'userId':user_id})
         if model is None:

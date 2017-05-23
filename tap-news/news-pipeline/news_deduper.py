@@ -12,6 +12,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
 import news_topic_modeling_service_client
+import msg_to_graphite
+import system_log_client
 
 from cloudAMQP_client import CloudAMQPClient
 import yaml
@@ -31,12 +33,14 @@ SAME_NEWS_SIMILARITY_THRESHOLD = 0.9
 cloudAMQP_client = CloudAMQPClient(DEDUPE_NEWS_TASK_QUEUE_URL, DEDUPE_NEWS_TASK_QUEUE_NAME)
 
 def handle_message(msg):
+    print "handle_message from dedupe queue"
     if msg is None or not isinstance(msg, dict):
-        print "Message is broken!"
+        system_log_client.logger.warn("Message is broken!")
+        # print "Message is broken!"
         return
-
+    #stop using str to convert from unicode to encoded text/bytes
     task = msg
-    text = str(task['text'])
+    text = str(task['text'].encode('utf-8'))
 
     if text is None:
         return
@@ -50,7 +54,7 @@ def handle_message(msg):
     recent_news_list = list(db[NEWS_TABLE_NAME].find({'publishedAt': {'$gte': published_at_day_begin, '$lt': published_at_day_end}}))
 
     if recent_news_list is not None and len(recent_news_list) > 0:
-        documents = [str(news['text']) for news in recent_news_list]
+        documents = [str(news['text'].encode('utf-8')) for news in recent_news_list]
         documents.insert(0, text)
 
         # Calculate similarity matrix
@@ -63,7 +67,8 @@ def handle_message(msg):
         for row in range(1, rows):
             if pairwise_sim[row, 0] > SAME_NEWS_SIMILARITY_THRESHOLD:
                 # Duplicated news. Ignore.
-                print "Duplicated news. Ignore."
+                # print "Duplicated news. Ignore."
+                system_log_client.logger.warn("Duplicated news. Ignore.")
                 return
     task['publishedAt'] = parser.parse(task['publishedAt'])
 
@@ -82,7 +87,10 @@ while True:
             # parse and process the work
             try:
                 handle_message(msg)
+                args = ['tap-news.AMQP.dedupe','1']
+                msg_to_graphite.main(args)
             except Exception as e:
-                print e
+                # print e
+                system_log_client.logger.error(e)
                 pass
         cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)

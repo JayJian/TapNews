@@ -13,6 +13,7 @@ class NewsPanel extends React.Component{
 		this.handleScroll = this.handleScroll.bind(this);
 	}
 
+	//DidMount makes it clear data won't be loaded until after the initial render
 	componentDidMount() {
 		this.loadMoreNews();
 		this.loadMoreNews = _.debounce(this.loadMoreNews, 1000);
